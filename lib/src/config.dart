@@ -20,20 +20,38 @@ class Config {
   
   /// Return the value under [key] in the configuration
   dynamic operator [](String key) {
-    key = _resolveAlias(key.toLowerCase());
-    return this._conf[key];
+    return resolve(key);
   }
   
   operator[]=(String key, dynamic val) {
-    this._conf[_resolveAlias(key.toLowerCase())] = val;
+    apply(key, val);
   }
-}
 
-/// [resolve] will return the value
-dynamic resolve(String key, Map<String, dynamic> values, {String sep = '.'}) {
-  var keys = key.split(sep);
-  for (var i = 0; i < (keys.length-2); i++) {
-    values = values != null ? values[keys[i]] : null;
+  /// [resolve] will return the value after resolving the graph
+  /// each layer is separated by a '.'
+  dynamic resolve(String key, {String sep = '.'}) {
+  	key = key.toLowerCase();
+	  var keys = key.split(sep);
+	  for (var i = 0; i < (keys.length-1); i++) {
+	  	var k = _resolveAlias(keys[i]);
+		  _conf = _conf != null ? _conf[k] : null;
+	  }
+	  return _conf != null ? _conf[_resolveAlias(keys.last)] : null;
   }
-  return values != null ? values[keys.last] : null;
+
+  /// [apply] will return the value after resolving the graph
+  /// each layer is separated by a '.'
+  void apply(String key, dynamic value, {String sep = '.'}) {
+  	key = key.toLowerCase();
+	  var keys = key.split(sep);
+	  for (var i = 0; i < (keys.length-1); i++) {
+	  	var k = _resolveAlias(keys[i]);
+		  if (_conf.containsKey(k)) {
+		  	_conf[k] = new Config();
+		  }
+		  _conf = _conf[k];
+	  }
+	  _conf ??= <String, dynamic>{};
+	  _conf[_resolveAlias(keys.last)] = value;
+  }
 }
