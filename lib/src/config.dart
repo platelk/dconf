@@ -1,9 +1,14 @@
+/// [Config] will hold the configuration
 class Config {
   Map<String, dynamic> _conf = {};
   Map<String, String> _alias = {};
 
   Config();
 
+  Config.fromMap(Map<String, dynamic> values) {
+  	this._conf = values;
+  }
+  
   /// [alias] will allow to give a specific key an alias name.
   void alias(String from, String to) {
     _alias[from.toLowerCase()] = to.toLowerCase();
@@ -20,38 +25,40 @@ class Config {
   
   /// Return the value under [key] in the configuration
   dynamic operator [](String key) {
-    return resolve(key);
+    return _resolve(key);
   }
   
   operator[]=(String key, dynamic val) {
-    apply(key, val);
+    _apply(key, val);
   }
 
   /// [resolve] will return the value after resolving the graph
   /// each layer is separated by a '.'
-  dynamic resolve(String key, {String sep = '.'}) {
+  dynamic _resolve(String key, {String sep = '.'}) {
   	key = key.toLowerCase();
 	  var keys = key.split(sep);
+	  var val = _conf;
 	  for (var i = 0; i < (keys.length-1); i++) {
 	  	var k = _resolveAlias(keys[i]);
-		  _conf = _conf != null ? _conf[k] : null;
+		  val = val != null ? val[k] : null;
 	  }
-	  return _conf != null ? _conf[_resolveAlias(keys.last)] : null;
+	  return val != null ? val[_resolveAlias(keys.last)] : null;
   }
 
   /// [apply] will return the value after resolving the graph
   /// each layer is separated by a '.'
-  void apply(String key, dynamic value, {String sep = '.'}) {
+  void _apply(String key, dynamic value, {String sep = '.'}) {
   	key = key.toLowerCase();
 	  var keys = key.split(sep);
+	  var val = _conf;
 	  for (var i = 0; i < (keys.length-1); i++) {
 	  	var k = _resolveAlias(keys[i]);
-		  if (_conf.containsKey(k)) {
-		  	_conf[k] = new Config();
+		  if (!val.containsKey(k)) {
+		  	val[k] = <String, dynamic>{};
 		  }
-		  _conf = _conf[k];
+		  val = val[k];
 	  }
-	  _conf ??= <String, dynamic>{};
-	  _conf[_resolveAlias(keys.last)] = value;
+	  val ??= <String, dynamic>{};
+	  val[_resolveAlias(keys.last)] = value;
   }
 }
