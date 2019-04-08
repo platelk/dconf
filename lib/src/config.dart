@@ -1,4 +1,7 @@
-/// [Config] will hold the configuration
+/// [Config] will hold the configuration after the load.
+/// It will allow to retrieve or to override configurations
+/// It can use dot notation to resolve deepest configuration key
+/// like ```conf["key1.subkey1"]```
 class Config {
   Map<String, dynamic> _conf = {};
   Map<String, String> _alias = {};
@@ -14,6 +17,19 @@ class Config {
     _alias[from.toLowerCase()] = to.toLowerCase();
   }
 
+  T get<T>(String key) {
+  	return _resolve(key) as T;
+  }
+  
+  /// Return the value under [key] in the configuration
+  
+  dynamic operator [](String key) {
+    return _resolve(key);
+  }
+  operator[]=(String key, dynamic val) {
+    _apply(key, val);
+  }
+  
   // _resolveAlias will return the final name of a given key
   // after resolving all its aliases.
   String _resolveAlias(String from) {
@@ -22,17 +38,8 @@ class Config {
     }
     return from;
   }
-  
-  /// Return the value under [key] in the configuration
-  dynamic operator [](String key) {
-    return _resolve(key);
-  }
-  
-  operator[]=(String key, dynamic val) {
-    _apply(key, val);
-  }
 
-  /// [resolve] will return the value after resolving the graph
+  /// [_resolve] will return the value after resolving the graph
   /// each layer is separated by a '.'
   dynamic _resolve(String key, {String sep = '.'}) {
   	key = key.toLowerCase();
@@ -45,7 +52,7 @@ class Config {
 	  return val != null ? val[_resolveAlias(keys.last)] : null;
   }
 
-  /// [apply] will return the value after resolving the graph
+  /// [_apply] will return the value after resolving the graph
   /// each layer is separated by a '.'
   void _apply(String key, dynamic value, {String sep = '.'}) {
   	key = key.toLowerCase();
