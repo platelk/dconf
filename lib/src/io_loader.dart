@@ -5,10 +5,15 @@ import './loader.dart';
 
 class IOLoader extends Loader {
   List<String> _paths = ["."];
+  String envPrefix = "dconf";
+  String Function(String) envReplacer = rewriteEnvKey;
   
   @override
   Config load() {
-    return _loadFromFiles();
+    var conf = new Config();
+    conf.merge(_loadFromEnv());
+    conf.merge(_loadFromFiles());
+    return conf;
   }
   
   Config _loadFromFiles() {
@@ -18,6 +23,17 @@ class IOLoader extends Loader {
         conf.merge(loadFromPath("${path}/${configName}.${ext}"));
       }
     }
+    return conf;
+  }
+  
+  Config _loadFromEnv() {
+    var conf = new Config();
+    Platform.environment.forEach((key, value) {
+      var resolvedKey = envReplacer(key);
+      if (resolvedKey.startsWith(envPrefix.toLowerCase())) {
+        conf[resolvedKey.substring(envPrefix.length+1)] = value;
+      }
+    });
     return conf;
   }
   
@@ -31,4 +47,8 @@ class IOLoader extends Loader {
     var content = f.readAsStringSync();
     return this.loadFrom(content);
   }
+}
+
+String rewriteEnvKey(String envKey) {
+  return envKey.splitMapJoin("_", onMatch: (m) => ".", onNonMatch: (m) => m.toLowerCase());
 }
