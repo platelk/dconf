@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:collection/collection.dart';
+
 /// [Config] will hold the configuration after the load.
 /// It will allow to retrieve or to override configurations
 /// It can use dot notation to resolve deepest configuration key
@@ -9,7 +12,15 @@ class Config {
   Config();
 
   Config.fromMap(Map<String, dynamic> values) {
-  	this._conf = values;
+  	this._conf = values ?? <String, dynamic>{};
+  }
+  
+  void merge(Config conf) {
+  	if (conf == null) {
+  		return;
+	  }
+  	this._conf = mergeMaps(this._conf, conf._conf, value: _combValues);
+  	this._alias = mergeMaps<String, String>(this._alias, conf._alias);
   }
   
   /// [alias] will allow to give a specific key an alias name.
@@ -30,6 +41,10 @@ class Config {
     _apply(key, val);
   }
   
+  String toString() {
+  	return json.encode(_conf);
+  }
+  
   // _resolveAlias will return the final name of a given key
   // after resolving all its aliases.
   String _resolveAlias(String from) {
@@ -42,12 +57,10 @@ class Config {
   /// [_resolve] will return the value after resolving the graph
   /// each layer is separated by a '.'
   dynamic _resolve(String key, {String sep = '.'}) {
-  	key = key.toLowerCase();
-	  var keys = key.split(sep);
+	  var keys = key.toLowerCase().split(sep);
 	  var val = _conf;
 	  for (var i = 0; i < (keys.length-1); i++) {
-	  	var k = _resolveAlias(keys[i]);
-		  val = val != null ? val[k] : null;
+		  val = val != null ? val[_resolveAlias(keys[i])] : null;
 	  }
 	  return val != null ? val[_resolveAlias(keys.last)] : null;
   }
@@ -55,8 +68,7 @@ class Config {
   /// [_apply] will return the value after resolving the graph
   /// each layer is separated by a '.'
   void _apply(String key, dynamic value, {String sep = '.'}) {
-  	key = key.toLowerCase();
-	  var keys = key.split(sep);
+	  var keys = key.toLowerCase().split(sep);
 	  var val = _conf;
 	  for (var i = 0; i < (keys.length-1); i++) {
 	  	var k = _resolveAlias(keys[i]);
@@ -68,4 +80,11 @@ class Config {
 	  val ??= <String, dynamic>{};
 	  val[_resolveAlias(keys.last)] = value;
   }
+}
+
+dynamic _combValues(dynamic v1, dynamic v2) {
+	if (v1 is Map && v2 is Map && v1 != null && v2 != null) {
+		return mergeMaps(v1, v2, value: _combValues);
+	}
+	return v2;
 }
