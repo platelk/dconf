@@ -1,6 +1,7 @@
 name: dconf
 description: >
-  dconf
+  dconf is a simple package which allow to retrieve, parse and manage configuration
+  is the most agnostic way possible.
 
 version: 0.1.0
 homepage: https://github.com/platelk/dconf
