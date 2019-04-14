@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:yaml/yaml.dart';
 
 import './config.dart';
@@ -20,6 +21,7 @@ abstract class Loader {
 
   Config loadFrom(String content, {String extension}) {
     extension ??= _defaultConfigType;
+    extension = extension.isEmpty ? _defaultConfigType : extension;
     return new Config.fromMap(parsers[extension](content));
   }
 
