@@ -32,5 +32,11 @@ void main() {
       c["loud"] = true;
       expect(c["verbose"], isTrue);
     });
+    test('Register alias on one part of the key', () {
+      var c = new conf.Config();
+      c["http.port"] = "8080";
+      c.alias("server", "http");
+      expect(c["server.port"], equals("8080"));
+    });
   });
 }

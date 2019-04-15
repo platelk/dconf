@@ -18,6 +18,9 @@ abstract class Loader {
   }
 
   Config load();
+  void loadIn(Config conf) {
+    conf.merge(load());
+  }
 
   Config loadFrom(String content, {String extension}) {
     extension ??= _defaultConfigType;

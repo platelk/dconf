@@ -6,7 +6,7 @@ import 'package:path/path.dart' as p;
 import './loader.dart';
 
 class IOLoader extends Loader {
-  List<String> _paths = ["."];
+  List<String> _paths = [];
   String envPrefix = "dconf";
   String Function(String) envReplacer = rewriteEnvKey;
 
