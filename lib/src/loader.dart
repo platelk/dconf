@@ -7,7 +7,7 @@ import './config.dart';
 /// [Loader] is an abstract class which will contains the retrieve of the configuration
 /// from the defined sources, apply it on specific order to have a resolved configuration
 abstract class Loader {
-  String configName = "config";
+  List<String> configNames = ["config"];
   String _defaultConfigType = "yaml";
   Map<String, dynamic Function(String)> parsers = {};
 
@@ -27,6 +27,8 @@ abstract class Loader {
     extension = extension.isEmpty ? _defaultConfigType : extension;
     return new Config.fromMap(parsers[extension](content));
   }
+  
+  void addConfigName(String name) => configNames.add(name);
 
   set configType(String name) => _defaultConfigType = name.toLowerCase();
 }

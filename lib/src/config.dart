@@ -20,7 +20,7 @@ class Config {
     if (conf == null) {
       return;
     }
-    this._conf = mergeMaps(this._conf, conf._conf, value: _combValues);
+    this._conf = mergeMaps<String, dynamic>(this._conf, conf._conf, value: _combValues);
     this._alias = mergeMaps<String, String>(this._alias, conf._alias);
   }
 
@@ -86,7 +86,7 @@ class Config {
 
 dynamic _combValues(dynamic v1, dynamic v2) {
   if (v1 is Map && v2 is Map && v1 != null && v2 != null) {
-    return mergeMaps(v1, v2, value: _combValues);
+    return mergeMaps<String, dynamic>(v1, v2, value: _combValues);
   }
   return v2;
 }

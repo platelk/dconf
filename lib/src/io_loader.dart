@@ -39,7 +39,9 @@ class IOLoader extends Loader {
     var conf = new Config();
     for (var path in _paths) {
       for (var ext in this.parsers.keys) {
-        conf.merge(loadFromPath(p.join(path, "${configName}.${ext}")));
+        for (var name in this.configNames) {
+          conf.merge(loadFromPath(p.join(path, "${name}.${ext}")));
+        }
       }
     }
     return conf;
